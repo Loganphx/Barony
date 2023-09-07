@@ -592,6 +592,7 @@ namespace MainMenu {
         Controls controls[MAX_SPLITSCREEN];
 		bool classic_mode_enabled = false;
 		bool hardcore_mode_enabled = false;
+		bool infinite_dungeon_mode_enabled = false;
 		bool friendly_fire_enabled = true;
 		bool keep_inventory_enabled = false;
 		bool hunger_enabled = true;
@@ -2764,6 +2765,7 @@ namespace MainMenu {
 		if (multiplayer != CLIENT) {
 		    svFlags = classic_mode_enabled ? svFlags | SV_FLAG_CLASSIC : svFlags & ~(SV_FLAG_CLASSIC);
 		    svFlags = hardcore_mode_enabled ? svFlags | SV_FLAG_HARDCORE : svFlags & ~(SV_FLAG_HARDCORE);
+		    svFlags = infinite_dungeon_mode_enabled ? svFlags | SV_FLAG_INFINITE_DUNGEON : svFlags & ~(SV_FLAG_INFINITE_DUNGEON);
 		    svFlags = friendly_fire_enabled ? svFlags | SV_FLAG_FRIENDLYFIRE : svFlags & ~(SV_FLAG_FRIENDLYFIRE);
 		    svFlags = keep_inventory_enabled ? svFlags | SV_FLAG_KEEPINVENTORY : svFlags & ~(SV_FLAG_KEEPINVENTORY);
 		    svFlags = hunger_enabled ? svFlags | SV_FLAG_HUNGER : svFlags & ~(SV_FLAG_HUNGER);
@@ -2858,6 +2860,7 @@ namespace MainMenu {
         }
 		settings.classic_mode_enabled = svFlags & SV_FLAG_CLASSIC;
 		settings.hardcore_mode_enabled = svFlags & SV_FLAG_HARDCORE;
+		settings.infinite_dungeon_mode_enabled = svFlags & SV_FLAG_INFINITE_DUNGEON;
 		settings.friendly_fire_enabled = svFlags & SV_FLAG_FRIENDLYFIRE;
 		settings.keep_inventory_enabled = svFlags & SV_FLAG_KEEPINVENTORY;
 		settings.hunger_enabled = svFlags & SV_FLAG_HUNGER;
@@ -2999,6 +3002,7 @@ namespace MainMenu {
         }
 		file->property("classic_mode_enabled", classic_mode_enabled);
 		file->property("hardcore_mode_enabled", hardcore_mode_enabled);
+		file->property("infinite_dungeon_mode_enabled", infinite_dungeon_mode_enabled);
 		file->property("friendly_fire_enabled", friendly_fire_enabled);
 		file->property("keep_inventory_enabled", keep_inventory_enabled);
 		file->property("hunger_enabled", hunger_enabled);
@@ -6813,6 +6817,7 @@ bind_failed:
 		if (multiplayer == CLIENT) {
 			allSettings.classic_mode_enabled = svFlags & SV_FLAG_CLASSIC;
 			allSettings.hardcore_mode_enabled = svFlags & SV_FLAG_HARDCORE;
+			allSettings.infinite_dungeon_mode_enabled = svFlags & SV_FLAG_INFINITE_DUNGEON;
 			allSettings.friendly_fire_enabled = svFlags & SV_FLAG_FRIENDLYFIRE;
 			allSettings.keep_inventory_enabled = svFlags & SV_FLAG_KEEPINVENTORY;
 			allSettings.hunger_enabled = svFlags & SV_FLAG_HUNGER;
@@ -6833,6 +6838,8 @@ bind_failed:
 			allSettings.friendly_fire_enabled, [](Button& button){soundToggleSetting(button); allSettings.friendly_fire_enabled = button.isPressed();});
 		y += settingsAddBooleanOption(*settings_subwindow, y, "hardcore_mode", Language::get(5259), Language::get(5260),
 			allSettings.hardcore_mode_enabled, [](Button& button){soundToggleSetting(button); allSettings.hardcore_mode_enabled = button.isPressed();});
+		y += settingsAddBooleanOption(*settings_subwindow, y, "infinite_dungeon_mode", Language::get(5259), Language::get(5260),
+			allSettings.infinite_dungeon_mode_enabled, [](Button& button){soundToggleSetting(button); allSettings.infinite_dungeon_mode_enabled = button.isPressed();});
 		y += settingsAddBooleanOption(*settings_subwindow, y, "classic_mode", Language::get(5261), Language::get(5262),
 			allSettings.classic_mode_enabled, [](Button& button){soundToggleSetting(button); allSettings.classic_mode_enabled = button.isPressed();});
 		y += settingsAddBooleanOption(*settings_subwindow, y, "keep_inventory", Language::get(5263), Language::get(5264),
@@ -11676,6 +11683,7 @@ failed:
 		if (multiplayer == CLIENT) {
 			allSettings.classic_mode_enabled = lobbyWindowSvFlags & SV_FLAG_CLASSIC;
 			allSettings.hardcore_mode_enabled = lobbyWindowSvFlags & SV_FLAG_HARDCORE;
+			allSettings.infinite_dungeon_mode_enabled = lobbyWindowSvFlags & SV_FLAG_INFINITE_DUNGEON;
 			allSettings.friendly_fire_enabled = lobbyWindowSvFlags & SV_FLAG_FRIENDLYFIRE;
 			allSettings.keep_inventory_enabled = lobbyWindowSvFlags & SV_FLAG_KEEPINVENTORY;
 			allSettings.hunger_enabled = lobbyWindowSvFlags & SV_FLAG_HUNGER;
@@ -11743,6 +11751,7 @@ failed:
 			Language::get(5383), // disable friendly fire
 			Language::get(5384), // classic endings
 			Language::get(5385), // hardcore difficulty
+			Language::get(6022), // infinite dungeon difficulty
 #ifndef NINTENDO
 			Language::get(5386), // cheats
 #endif
@@ -11829,7 +11838,11 @@ failed:
 				setting->setPressed(allSettings.hardcore_mode_enabled);
 				setting->setCallback([](Button& button){soundCheckmark(); allSettings.hardcore_mode_enabled = button.isPressed();});
 				break;
-			case 8:
+			case 8: 
+				setting->setPressed(allSettings.infinite_dungeon_mode_enabled);
+				setting->setCallback([](Button& button){soundCheckmark(); allSettings.infinite_dungeon_mode_enabled = button.isPressed();});
+				break;
+			case 9:
 				setting->setPressed(allSettings.cheats_enabled);
 				setting->setCallback([](Button& button){soundCheckmark(); allSettings.cheats_enabled = button.isPressed();});
 				break;
@@ -12733,6 +12746,7 @@ failed:
 			if (multiplayer != CLIENT) {
 			    svFlags = allSettings.classic_mode_enabled ? svFlags | SV_FLAG_CLASSIC : svFlags & ~(SV_FLAG_CLASSIC);
 			    svFlags = allSettings.hardcore_mode_enabled ? svFlags | SV_FLAG_HARDCORE : svFlags & ~(SV_FLAG_HARDCORE);
+			    svFlags = allSettings.infinite_dungeon_mode_enabled ? svFlags | SV_FLAG_INFINITE_DUNGEON : svFlags & ~(SV_FLAG_INFINITE_DUNGEON);
 			    svFlags = allSettings.friendly_fire_enabled ? svFlags | SV_FLAG_FRIENDLYFIRE : svFlags & ~(SV_FLAG_FRIENDLYFIRE);
 			    svFlags = allSettings.keep_inventory_enabled ? svFlags | SV_FLAG_KEEPINVENTORY : svFlags & ~(SV_FLAG_KEEPINVENTORY);
 			    svFlags = allSettings.hunger_enabled ? svFlags | SV_FLAG_HUNGER : svFlags & ~(SV_FLAG_HUNGER);
@@ -19169,6 +19183,7 @@ failed:
 	static void createLocalOrNetworkMenu() {
 		allSettings.classic_mode_enabled = svFlags & SV_FLAG_CLASSIC;
 		allSettings.hardcore_mode_enabled = svFlags & SV_FLAG_HARDCORE;
+		allSettings.infinite_dungeon_mode_enabled = svFlags & SV_FLAG_INFINITE_DUNGEON;
 		allSettings.friendly_fire_enabled = svFlags & SV_FLAG_FRIENDLYFIRE;
 		allSettings.keep_inventory_enabled = svFlags & SV_FLAG_KEEPINVENTORY;
 		allSettings.hunger_enabled = svFlags & SV_FLAG_HUNGER;
@@ -22307,7 +22322,7 @@ failed:
 				{"Play Game", Language::get(5773), mainPlayGame},
 #else
 				{"Play Game", Language::get(5774), mainModsMenu},
-				{"Unload Mods", Language::get(5776), mainUnloadMods},
+				{"Uxnload Mods", Language::get(5776), mainUnloadMods},
 #endif
 				{"Adventure Archives", Language::get(5777), mainArchives},
 				{"Settings", Language::get(5778), mainSettings},

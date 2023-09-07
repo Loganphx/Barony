@@ -53,6 +53,7 @@
 #include "UnicodeDecoder.h"
 
 #include <atomic>
+#include <Config.hpp>
 #include <future>
 #include <thread>
 
